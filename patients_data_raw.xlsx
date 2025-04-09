@@ -1,0 +1,6 @@
+ID,Name,Age,Gender,Contact,Appointment Date,Appointment Time,Condition,Status,Notes
+1,John Doe,35,Male,9876543210,2024-04-10,10:00 AM,Hair Loss,scheduled,Regular checkup
+2,Jane Smith,28,Female,9876543211,2024-04-10,11:00 AM,Dandruff,waiting,Follow-up visit
+3,Robert Johnson,42,Male,9876543212,2024-04-11,09:30 AM,Hair Thinning,completed,Initial consultation
+4,Emily Davis,31,Female,9876543213,2024-04-11,02:00 PM,Bald Spots,cancelled,Rescheduled
+5,Michael Brown,45,Male,9876543214,2024-04-12,10:30 AM,Hair Fall,waiting,Regular checkup

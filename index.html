@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Automation System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f8fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dashboard-container, .questionnaire-container {
+            display: none;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #34495e;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .radio-group {
+            margin-top: 8px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .radio-option input[type="radio"],
+        .checkbox-option input[type="checkbox"] {
+            width: auto;
+            margin-right: 10p        }
+        
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-call {
+            background-color: #27ae60;
+            margin-top: 10px;
+        }
+        
+        .btn-call:hover {
+            background-color: #219653;
+        }
+        
+        .btn-back {
+            background-color: #7f8c8d;
+            margin-top: 20px;
+        }
+        
+        .btn-back:hover {
+            background-color: #6c7a7d;
+        }
+        
+        .btn-submit {
+            background-color: #e67e22;
+            margin-top: 30px;
+        }
+        
+        .btn-submit:hover {
+            background-color: #d35400;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 15px;
+            text-align: center;
+            display: none;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 30px;
+        }
+        
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .patient-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .patient-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .patient-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .patient-card.selected {
+            border: 2px solid #3498db;
+            background-color: #ecf0f1;
+        }
+        
+        .patient-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .patient-info {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 6px;
+        }
+        
+        .patient-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+        
+        .status-scheduled {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .status-completed {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .status-cancelled {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .status-waiting {
+            background-color: #f39c12;
+            color: white;
+        }
+        
+        .search-bar {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .checkbox-group {
+            margin-top: 8px;
+        }
+        
+        .checkbox-option {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        
+        .checkbox-label {
+            margin-top: -3px;
+        }
+        
+        .question-section {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .question-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .success-message {
+            background-color: #2ecc71;
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .prescription-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin: 20px auto;
+            max-width: 800px;
+        }
+
+        .prescription-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-share {
+            background-color: #3498db;
+        }
+
+        .btn-print {
+            background-color: #2ecc71;
+        }
+
+        .prescription-content {
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.6;
+            padding: 20px;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+            white-space: pre-wrap;
+        }
+
+        @media print {
+            .header, .prescription-actions {
+                display: none;
+            }
+            .prescription-content {
+                border: none;
+            }
+        }
+
+        .question-subtitle {
+            font-size: 16px;
+            color: #666;
+            margin: 10px 0;
+        }
+        
+        .treatment-description {
+            margin-left: 25px;
+            margin-top: 5px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .product-list {
+            margin-top: 5px;
+            margin-left: 20px;
+        }
+        
+        .product-list ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .product-list li {
+            margin: 3px 0;
+            color: #444;
+        }
+
+        .btn-limechat {
+            background-color: #25D366;  /* LimeChat green color */
+        }
+        
+        .btn-crm {
+            background-color: #4CAF50;  /* CRM green color */
+        }
+
+        .btn-pdf {
+            background-color: #e74c3c;  /* Red color for PDF button */
+        }
+        
+        .prescription-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 768px) {
+            .prescription-actions {
+                flex-direction: column;
+            }
+            
+            .prescription-actions button {
+                width: 100%;
+            }
+        }
+
+        .patient-table {
+            margin-top: 20px;
+        }
+        .status-scheduled { color: #0d6efd; }
+        .status-waiting { color: #ffc107; }
+        .status-completed { color: #198754; }
+        .status-cancelled { color: #dc3545; }
+
+        .btn-limechat-pdf {
+            background-color: #25D366;  /* LimeChat green color */
+            border: 2px solid #128C7E;  /* Darker green border */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Section -->
+        <div class="login-container" id="login-section">
+            <h1>Doctor Automation System</h1>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Enter your username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your password">
+            </div>
+            <button class="btn" id="login-btn">Login</button>
+            <p class="error-message" id="error-message">Invalid username or password!</p>
+        </div>
+        
+        <!-- Dashboard Section -->
+        <div class="dashboard-container" id="dashboard-section">
+            <div class="header">
+                <h1>Patient Dashboard</h1>
+                <button class="logout-btn" id="logout-btn">Logout</button>
+            </div>
+            
+            <input type="text" class="search-bar" id="search-bar" placeholder="Search patients...">
+            
+            <div class="patient-grid" id="patient-grid">
+                <!-- Patient cards will be added here dynamically -->
+            </div>
+            
+            <div class="action-bar" id="action-bar">
+                <button class="btn btn-call" id="call-btn" disabled>Call Selected Patient</button>
+                <button class="btn" id="questionnaire-btn" disabled>Open Questionnaire</button>
+            </div>
+        </div>
+        
+        <!-- Questionnaire Section -->
+        <div class="questionnaire-container" id="questionnaire-section">
+            <div class="header">
+                <h1>Patient Questionnaire</h1>
+                <button class="logout-btn" id="questionnaire-logout-btn">Logout</button>
+            </div>
+            
+            <h2 id="questionnaire-patient-name">Questionnaire for: </h2>
+            
+            <form id="patient-questionnaire">
+                <div class="question-section">
+                    <div class="question-title">1. What is your full name?</div>
+                    <div class="form-group">
+                        <input type="text" id="full-name" name="full-name">
+                    </div>
+                </div>
+                
+                <div class="question-section">
+                    <div class="question-title">2. How old are you?</div>
+                    <div class="form-group">
+                        <input type="number" id="age" name="age" min="1" max="120">
+                    </div>
+                </div>
+                
+                <div class="question-section">
+                    <div class="question-title">3. What is your gender?</div>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="gender-male" name="gender" value="Male">
+                            <label for="gender-male">Male</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="gender-female" name="gender" value="Female">
+                            <label for="gender-female">Female</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="gender-other" name="gender" value="Other">
+                            <label for="gender-other">Other</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question-section">
+                    <div class="question-title">4. What hair or scalp concerns are you experiencing?</div>
+                    <div class="checkbox-group">
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="concern-thinning" name="hair-concerns" value="Hair thinning">
+                            <label for="concern-thinning" class="checkbox-label">Hair thinning</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="concern-hairfall" name="hair-concerns" value="Hair fall">
+                            <label for="concern-hairfall" class="checkbox-label">Hair fall</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="concern-baldspots" name="hair-concerns" value="Bald spots">
+                            <label for="concern-baldspots" class="checkbox-label">Bald spots</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="concern-dandruff" name="hair-concerns" value="Dandruff">
+                            <label for="concern-dandruff" class="checkbox-label">Dandruff</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="concern-itchy" name="hair-concerns" value="Itchy scalp">
+                            <label for="concern-itchy" class="checkbox-label">Itchy scalp</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="concern-greying" name="hair-concerns" value="Premature greying">
+                            <label for="concern-greying" class="checkbox-label">Premature greying</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="concern-slowgrowth" name="hair-concerns" value="Slow hair growth">
+                            <label for="concern-slowgrowth" class="checkbox-label">Slow hair growth</label>
+                        </div>
+                        <div class="form-group">
+                            <label for="concern-other">Other (please specify):</label>
+                            <input type="text" id="concern-other" name="concern-other">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question-section">
+                    <div class="question-title">5. Hair Problem / Sexual Problem</div>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="problem-hair" name="problem-type" value="Only hair-related issues">
+                            <label for="problem-hair">Only hair-related issues</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="problem-both" name="problem-type" value="Both hair and sexual health issues">
+                            <label for="problem-both">Both hair and sexual health issues</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="problem-sexual" name="problem-type" value="Only sexual health issues">
+                            <label for="problem-sexual">Only sexual health issues</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question-section">
+                    <div class="question-title">6. Stages of Hair Loss</div>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="loss-none" name="hair-loss-stage" value="No noticeable hair loss">
+                            <label for="loss-none">No noticeable hair loss</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="loss-mild" name="hair-loss-stage" value="Mild hair thinning">
+                            <label for="loss-mild">Mild hair thinning</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="loss-moderate" name="hair-loss-stage" value="Moderate hair loss (visible scalp)">
+                            <label for="loss-moderate">Moderate hair loss (visible scalp)</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="loss-severe" name="hair-loss-stage" value="Severe hair loss (bald patches)">
+                            <label for="loss-severe">Severe hair loss (bald patches)</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="loss-extensive" name="hair-loss-stage" value="Extensive baldness">
+                            <label for="loss-extensive">Extensive baldness</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question-section">
+                    <div class="question-title">7. Dandruff</div>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="dandruff-yes" name="dandruff" value="Yes">
+                            <label for="dandruff-yes">Yes</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="dandruff-no" name="dandruff" value="No">
+                            <label for="dandruff-no">No</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question-section">
+                    <div class="question-title">8. Thinning/Bald Spots</div>
+                    <div class="form-group">
+                        <label for="thinning-description">Please describe the location and severity:</label>
+                        <textarea id="thinning-description" name="thinning-description"></textarea>
+                    </div>
+                </div>
+                
+                <!-- New questions added here -->
+                <div class="question-section">
+                    <div class="question-title">9. Have you used any hair medications or treatments in the past?</div>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="medications-yes" name="past-medications" value="Yes">
+                            <label for="medications-yes">Yes</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="medications-no" name="past-medications" value="No">
+                            <label for="medications-no">No</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question-section">
+                    <div class="question-title">10. Did you experience any side effects from those medications/treatments?</div>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="side-effects-yes" name="side-effects" value="Yes">
+                            <label for="side-effects-yes">Yes</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="side-effects-no" name="side-effects" value="No">
+                            <label for="side-effects-no">No</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="side-effects-unsure" name="side-effects" value="Not sure / Can't remember">
+                            <label for="side-effects-unsure">Not sure / Can't remember</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question-section">
+                    <div class="question-title">11. How long have you been experiencing hair loss?</div>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="duration-less6" name="hair-loss-duration" value="Less than 6 months">
+                            <label for="duration-less6">Less than 6 months</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="duration-6to12" name="hair-loss-duration" value="6 months - 1 year">
+                            <label for="duration-6to12">6 months - 1 year</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="duration-1to3" name="hair-loss-duration" value="1 - 3 years">
+                            <label for="duration-1to3">1 - 3 years</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="duration-more3" name="hair-loss-duration" value="More than 3 years">
+                            <label for="duration-more3">More than 3 years</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question-section">
+                    <div class="question-title">12. Do you have any lifestyle habits such as drinking or smoking?</div>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="habit-drink" name="lifestyle-habits" value="I drink occasionally">
+                            <label for="habit-drink">I drink occasionally</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="habit-smoke" name="lifestyle-habits" value="I smoke">
+                            <label for="habit-smoke">I smoke</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="habit-both" name="lifestyle-habits" value="I drink and smoke">
+                            <label for="habit-both">I drink and smoke</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="habit-none" name="lifestyle-habits" value="I don't have any of these habits">
+                            <label for="habit-none">I don't have any of these habits</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question-section">
+                    <div class="question-title">13. Is your hair fall genetic (family history of hair loss)?</div>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="genetic-yes" name="genetic" value="Yes, it runs in the family">
+                            <label for="genetic-yes">Yes, it runs in the family</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="genetic-no" name="genetic" value="No, it doesn't">
+                            <label for="genetic-no">No, it doesn't</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="genetic-unsure" name="genetic" value="Not sure">
+                            <label for="genetic-unsure">Not sure</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question-section">
+                    <div class="question-title">14. How many hours of sleep do you usually get per night?</div>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="sleep-less3" name="sleep-hours" value="Less than 3 hours">
+                            <label for="sleep-less3">Less than 3 hours</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="sleep-3to5" name="sleep-hours" value="3 - 5 hours">
+                            <label for="sleep-3to5">3 - 5 hours</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="sleep-6to8" name="sleep-hours" value="6 - 8 hours">
+                            <label for="sleep-6to8">6 - 8 hours</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="sleep-more8" name="sleep-hours" value="More than 8 hours">
+                            <label for="sleep-more8">More than 8 hours</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question-section">
+                    <div class="question-title">15. Do you face any digestive issues such as bloating, acidity, etc.?</div>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="digestive-frequent" name="digestive-issues" value="Yes, frequently">
+                            <label for="digestive-frequent">Yes, frequently</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="digestive-sometimes" name="digestive-issues" value="Sometimes">
+                            <label for="digestive-sometimes">Sometimes</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="digestive-rarely" name="digestive-issues" value="Rarely">
+                            <label for="digestive-rarely">Rarely</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="digestive-no" name="digestive-issues" value="No">
+                            <label for="digestive-no">No</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question-section">
+                    <div class="question-title">16. Do you face constipation or irregular bowel movements?</div>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="bowel-yes" name="bowel-movements" value="Yes">
+                            <label for="bowel-yes">Yes</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="bowel-occasional" name="bowel-movements" value="Occasionally">
+                            <label for="bowel-occasional">Occasionally</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="bowel-no" name="bowel-movements" value="No">
+                            <label for="bowel-no">No</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question-section">
+                    <div class="question-title">17. Test Recommendations (Based on Doctor Consultation)</div>
+                    <div class="question-subtitle">Has a doctor suggested any tests for your hair loss?</div>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="tests-yes" name="recommended-tests" value="Yes">
+                            <label for="tests-yes">Yes</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="tests-no" name="recommended-tests" value="No">
+                            <label for="tests-no">No</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="tests-notconsulted" name="recommended-tests" value="Not consulted a doctor yet">
+                            <label for="tests-notconsulted">Not consulted a doctor yet</label>
+                        </div>
+                    </div>
+                    
+                    <div id="gender-specific-tests" style="display: none;">
+                        <div class="question-subtitle">Please select your gender to see the recommended tests:</div>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="test-gender-male" name="test-gender" value="male">
+                                <label for="test-gender-male">👦 Male</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="test-gender-female" name="test-gender" value="female">
+                                <label for="test-gender-female">👩 Female</label>
+                            </div>
+                        </div>
+                        
+                        <div id="male-tests" style="display: none;">
+                            <div class="checkbox-group">
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="test-tsh" name="male-tests" value="TSH">
+                                    <label for="test-tsh">TSH (Thyroid Stimulating Hormone)</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="test-cbc" name="male-tests" value="CBC">
+                                    <label for="test-cbc">CBC (Complete Blood Count)</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="test-cft" name="male-tests" value="CFT">
+                                    <label for="test-cft">CFT (Cortisol Free Testosterone)</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="test-b12" name="male-tests" value="B12">
+                                    <label for="test-b12">Vitamin B12</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="test-d3" name="male-tests" value="D3">
+                                    <label for="test-d3">Vitamin D3</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="other-tests">Other Tests (Optional):</label>
+                                <input type="text" id="other-tests" name="other-tests" placeholder="Enter any other recommended tests">
+                            </div>
+                        </div>
+                        
+                        <div id="female-tests" style="display: none;">
+                            <div class="checkbox-group">
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="test-female-tsh" name="female-tests" value="TSH">
+                                    <label for="test-female-tsh">TSH (Thyroid Stimulating Hormone)</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="test-female-cbc" name="female-tests" value="CBC">
+                                    <label for="test-female-cbc">CBC (Complete Blood Count)</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="test-female-iron" name="female-tests" value="Iron">
+                                    <label for="test-female-iron">Iron Studies</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="test-female-b12" name="female-tests" value="B12">
+                                    <label for="test-female-b12">Vitamin B12</label>
+                                </div>
+                                <div class="checkbox-option">
+                                    <input type="checkbox" id="test-female-d3" name="female-tests" value="D3">
+                                    <label for="test-female-d3">Vitamin D3</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="other-tests-female">Other Tests (Optional):</label>
+                                <input type="text" id="other-tests-female" name="other-tests-female" placeholder="Enter any other recommended tests">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="question-section">
+                    <div class="question-title">18. Treatment Plan Suggested by the Doctor</div>
+                    <div class="question-subtitle">Based on your condition, the following treatment plan is recommended:</div>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="treatment-complete" name="treatment-plan" value="Complete Hair Kit">
+                            <label for="treatment-complete">✅ Complete Hair Kit</label>
+                            <div class="treatment-description">
+                                For advanced hair fall, includes Minoxidil, Biotin, Anti-Dandruff Shampoo & DHT Blocker Tablets.
+                                <div class="product-list">
+                                    <ul>
+                                        <li>Gummies</li>
+                                        <li>Sinibis</li>
+                                        <li>Minibis</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="treatment-classic" name="treatment-plan" value="Classic Hair Kit">
+                            <label for="treatment-classic">✳️ Classic Hair Kit</label>
+                            <div class="treatment-description">
+                                For mild to moderate hair fall, includes Minoxidil and Biotin supplements.
+                                <div class="product-list">
+                                    <ul>
+                                        <li>Gummies</li>
+                                        <li>Sinibis</li>
+                                        <li>Finibis</li>
+                                        <li>Minibis</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="treatment-dandruff" name="treatment-plan" value="Hair Dandruff Kit">
+                            <label for="treatment-dandruff">❄️ Hair Dandruff Kit</label>
+                            <div class="treatment-description">
+                                For hair fall due to dandruff, includes Ketoconazole Shampoo and scalp treatment lotion.
+                                <div class="product-list">
+                                    <ul>
+                                        <li>Gummies</li>
+                                        <li>Shampoo</li>
+                                        <li>Conditioner</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <style>
+                    .question-subtitle {
+                        font-size: 16px;
+                        color: #666;
+                        margin: 10px 0;
+                    }
+                    
+                    .treatment-description {
+                        margin-left: 25px;
+                        margin-top: 5px;
+                        font-size: 14px;
+                        color: #666;
+                    }
+                    
+                    .product-list {
+                        margin-top: 5px;
+                        margin-left: 20px;
+                    }
+                    
+                    .product-list ul {
+                        list-style-type: none;
+                        padding-left: 0;
+                    }
+                    
+                    .product-list li {
+                        margin: 3px 0;
+                        color: #444;
+                    }
+                </style>
+
+                <script>
+                    // Add event listeners for test recommendations
+                    document.querySelectorAll('input[name="recommended-tests"]').forEach(radio => {
+                        radio.addEventListener('change', function() {
+                            const genderSpecificTests = document.getElementById('gender-specific-tests');
+                            if (this.id === 'tests-yes' && this.checked) {
+                                genderSpecificTests.style.display = 'block';
+                            } else {
+                                genderSpecificTests.style.display = 'none';
+                                document.getElementById('male-tests').style.display = 'none';
+                                document.getElementById('female-tests').style.display = 'none';
+                            }
+                        });
+                    });
+
+                    // Add event listeners for gender selection
+                    document.querySelectorAll('input[name="test-gender"]').forEach(radio => {
+                        radio.addEventListener('change', function() {
+                            const maleTests = document.getElementById('male-tests');
+                            const femaleTests = document.getElementById('female-tests');
+                            
+                            if (this.value === 'male') {
+                                maleTests.style.display = 'block';
+                                femaleTests.style.display = 'none';
+                            } else {
+                                maleTests.style.display = 'none';
+                                femaleTests.style.display = 'block';
+                            }
+                        });
+                    });
+                </script>
+
+                <button type="submit" class="btn btn-submit" id="submit-btn">Submit Questionnaire</button>
+                <button type="button" class="btn btn-back" id="back-btn">Back to Dashboard</button>
+            </form>
+            
+            <div class="success-message" id="success-message">
+                Questionnaire submitted successfully! Responses have been saved.
+            </div>
+        </div>
+
+        <!-- Prescription Section -->
+        <div class="prescription-container" id="prescription-section" style="display: none;">
+            <div class="header">
+                <h1>Patient Prescription</h1>
+                <div class="prescription-actions">
+                    <button class="btn btn-limechat" id="limechat-btn">Share via LimeChat</button>
+                    <button class="btn btn-print" id="print-btn">Print</button>
+                    <button class="btn btn-pdf" id="pdf-btn">Download PDF</button>
+                    <button class="btn btn-limechat-pdf" id="limechat-pdf-btn">Share PDF via LimeChat</button>
+                    <button class="btn btn-back" id="back-to-dashboard">Back to Dashboard</button>
+                </div>
+            </div>
+            
+            <div class="prescription-content" id="prescription-content">
+                <!-- Prescription content will be inserted here -->
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        // DOM Elements
+        const loginSection = document.getElementById('login-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const questionnaireSection = document.getElementById('questionnaire-section');
+        const prescriptionSection = document.getElementById('prescription-section');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const questionnaireLogoutBtn = document.getElementById('questionnaire-logout-btn');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const errorMessage = document.getElementById('error-message');
+        const patientGrid = document.getElementById('patient-grid');
+        const searchBar = document.getElementById('search-bar');
+        const callBtn = document.getElementById('call-btn');
+        const questionnaireBtn = document.getElementById('questionnaire-btn');
+        const backBtn = document.getElementById('back-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const questionnairePatientName = document.getElementById('questionnaire-patient-name');
+        const patientQuestionnaireForm = document.getElementById('patient-questionnaire');
+        const successMessage = document.getElementById('success-message');
+        const testsSpecifyGroup = document.getElementById('tests-specify-group');
+        const prescriptionContent = document.getElementById('prescription-content');
+        
+        // Global variables
+        let selectedPatient = null;
+        let patientResponses = [];
+
+        // Function to load patients from Excel file
+        async function loadPatientsFromExcel() {
+            try {
+                const response = await fetch('patients_data_raw.xlsx');
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer);
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const patients = XLSX.utils.sheet_to_json(firstSheet);
+                
+                // Convert the data to match our existing format
+                return patients.map(patient => ({
+                    id: patient.ID,
+                    name: patient.Name,
+                    age: patient.Age,
+                    gender: patient.Gender,
+                    contact: patient.Contact,
+                    appointment: `${patient['Appointment Date']} ${patient['Appointment Time']}`,
+                    condition: patient.Condition,
+                    status: patient.Status,
+                    notes: patient.Notes
+                }));
+            } catch (error) {
+                console.error('Error loading patients:', error);
+                return [];
+            }
+        }
+
+        // Update the displayPatients function to show the additional information
+        async function displayPatients() {
+            const patients = await loadPatientsFromExcel();
+            patientGrid.innerHTML = '';
+            
+            patients.forEach(patient => {
+                const patientCard = document.createElement('div');
+                patientCard.className = 'patient-card';
+                patientCard.dataset.id = patient.id;
+                
+                let statusClass;
+                switch(patient.status) {
+                    case 'scheduled':
+                        statusClass = 'status-scheduled';
+                        break;
+                    case 'waiting':
+                        statusClass = 'status-waiting';
+                        break;
+                    case 'completed':
+                        statusClass = 'status-completed';
+                        break;
+                    case 'cancelled':
+                        statusClass = 'status-cancelled';
+                        break;
+                    default:
+                        statusClass = '';
+                }
+                
+                patientCard.innerHTML = `
+                    <div class="patient-name">${patient.name}</div>
+                    <div class="patient-info">ID: ${patient.id}</div>
+                    <div class="patient-info">Age: ${patient.age} | Gender: ${patient.gender}</div>
+                    <div class="patient-info">Contact: ${patient.contact}</div>
+                    <div class="patient-info">Appointment: ${patient.appointment}</div>
+                    <div class="patient-info">Condition: ${patient.condition}</div>
+                    <div class="patient-info">Notes: ${patient.notes}</div>
+                    <div class="patient-status ${statusClass}">${patient.status}</div>
+                `;
+                
+                patientCard.addEventListener('click', function() {
+                    document.querySelectorAll('.patient-card').forEach(card => {
+                        card.classList.remove('selected');
+                    });
+                    
+                    this.classList.add('selected');
+                    selectedPatient = patient;
+                    callBtn.disabled = false;
+                    questionnaireBtn.disabled = false;
+                });
+                
+                patientGrid.appendChild(patientCard);
+            });
+        }
+
+        // Login functionality
+        loginBtn.addEventListener('click', async function() {
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+            
+            if (username === "apparna" && password === "apparna007") {
+                loginSection.style.display = 'none';
+                dashboardSection.style.display = 'block';
+                errorMessage.style.display = 'none';
+                await displayPatients();
+            } else {
+                errorMessage.style.display = 'block';
+            }
+        });
+
+        // Logout functionality
+        logoutBtn.addEventListener('click', function() {
+            logoutUser();
+        });
+        
+        questionnaireLogoutBtn.addEventListener('click', function() {
+            logoutUser();
+        });
+        
+        function logoutUser() {
+            loginSection.style.display = 'block';
+            dashboardSection.style.display = 'none';
+            questionnaireSection.style.display = 'none';
+            usernameInput.value = '';
+            passwordInput.value = '';
+            selectedPatient = null;
+            resetQuestionnaire();
+        }
+
+        // Call patient functionality
+        callBtn.addEventListener('click', function() {
+            if (selectedPatient) {
+                // Use the tel: protocol to trigger phone call
+                window.location.href = `tel:${selectedPatient.contact}`;
+            }
+        });
+        
+        // Open questionnaire functionality
+        questionnaireBtn.addEventListener('click', function() {
+            if (selectedPatient) {
+                dashboardSection.style.display = 'none';
+                questionnaireSection.style.display = 'block';
+                questionnairePatientName.textContent = `Questionnaire for: ${selectedPatient.name}`;
+                resetQuestionnaire();
+                
+                // Pre-fill some information if available
+                document.getElementById('full-name').value = selectedPatient.name;
+                document.getElementById('age').value = selectedPatient.age;
+                if (selectedPatient.gender === "Male") {
+                    document.getElementById('gender-male').checked = true;
+                } else if (selectedPatient.gender === "Female") {
+                    document.getElementById('gender-female').checked = true;
+                }
+            }
+        });
+        
+        // Back to dashboard functionality
+        backBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            questionnaireSection.style.display = 'none';
+            dashboardSection.style.display = 'block';
+            successMessage.style.display = 'none';
+        });
+        
+        // Show/hide tests specification field based on selection
+        document.querySelectorAll('input[name="recommended-tests"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.id === 'tests-yes' && this.checked) {
+                    testsSpecifyGroup.style.display = 'block';
+                } else {
+                    testsSpecifyGroup.style.display = 'none';
+                }
+            });
+        });
+        
+        // Submit questionnaire functionality
+        patientQuestionnaireForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(patientQuestionnaireForm);
+            const responses = {};
+            
+            // Process checkbox values (hair concerns)
+            const hairConcerns = [];
+            document.querySelectorAll('input[name="hair-concerns"]:checked').forEach(checkbox => {
+                hairConcerns.push(checkbox.value);
+            });
+            
+            // Add other hair concern if specified
+            const otherConcern = formData.get('concern-other');
+            if (otherConcern) {
+                hairConcerns.push(otherConcern);
+            }
+            
+            // Add tests specification if provided
+            let recommendedTests = formData.get('recommended-tests');
+            if (recommendedTests === 'Yes' && formData.get('tests-specify')) {
+                recommendedTests += ` (${formData.get('tests-specify')})`;
+            }
+            
+            // Build response object
+            responses.patientId = selectedPatient.id;
+            responses.patientName = formData.get('full-name');
+            responses.age = formData.get('age');
+            responses.gender = formData.get('gender');
+            responses.hairConcerns = hairConcerns;
+            responses.problemType = formData.get('problem-type');
+            responses.hairLossStage = formData.get('hair-loss-stage');
+            responses.dandruff = formData.get('dandruff');
+            responses.thinningDescription = formData.get('thinning-description');
+            responses.pastMedications = formData.get('past-medications');
+            responses.sideEffects = formData.get('side-effects');
+            responses.hairLossDuration = formData.get('hair-loss-duration');
+            responses.lifestyleHabits = formData.get('lifestyle-habits');
+            responses.genetic = formData.get('genetic');
+            responses.sleepHours = formData.get('sleep-hours');
+            responses.digestiveIssues = formData.get('digestive-issues');
+            responses.bowelMovements = formData.get('bowel-movements');
+            responses.recommendedTests = recommendedTests;
+            responses.timestamp = new Date().toISOString();
+            
+            // Save responses
+            patientResponses.push(responses);
+            localStorage.setItem('patientResponses', JSON.stringify(patientResponses));
+            
+            // Hide questionnaire section and show prescription section
+            questionnaireSection.style.display = 'none';
+            prescriptionSection.style.display = 'block';
+            
+            // Generate and display prescription
+            generatePrescriptionDocument(responses);
+            
+            // Show success message
+            successMessage.style.display = 'block';
+            successMessage.textContent = 'Questionnaire submitted successfully! Prescription has been generated.';
+            
+            // Scroll to prescription section
+            prescriptionSection.scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        // Function to generate and display prescription
+        function generatePrescriptionDocument(responses) {
+            // Get selected treatment plan
+            const treatmentPlan = document.querySelector('input[name="treatment-plan"]:checked')?.value || 'Not selected';
+            
+            // Determine products based on treatment plan
+            let prescribedProducts = '';
+            switch(treatmentPlan) {
+                case 'Complete Hair Kit':
+                    prescribedProducts = `
+   - Gummies - Take as directed
+   - Sinibis - Take as directed
+   - Minibis - Take as directed`;
+                    break;
+                case 'Classic Hair Kit':
+                    prescribedProducts = `
+   - Gummies - Take as directed
+   - Sinibis - Take as directed
+   - Finibis - Take as directed
+   - Minibis - Take as directed`;
+                    break;
+                case 'Hair Dandruff Kit':
+                    prescribedProducts = `
+   - Gummies - Take as directed
+   - Shampoo - Use 2-3 times per week
+   - Conditioner - Use after shampoo`;
+                    break;
+                default:
+                    prescribedProducts = `
+   - Minoxidil 5% solution - Apply twice daily
+   - Finasteride 1mg - Take once daily
+   - Ketoconazole shampoo - Use 2-3 times per week`;
+            }
+            
+            // Create prescription content
+            const content = `
+DOCTOR'S PRESCRIPTION
+=====================
+Dr. Shankar Dada MBBS
+
+Patient Information:
+------------------
+Name: ${responses.patientName}
+Age: ${responses.age}
+Gender: ${responses.gender}
+Date: ${new Date().toLocaleDateString()}
+
+Diagnosis:
+---------
+Primary Concerns: ${responses.hairConcerns.join(', ')}
+Problem Type: ${responses.problemType}
+Hair Loss Stage: ${responses.hairLossStage}
+Dandruff: ${responses.dandruff}
+Thinning/Bald Spots: ${responses.thinningDescription || 'Not specified'}
+
+Patient History:
+--------------
+Past Medications: ${responses.pastMedications}
+Side Effects: ${responses.sideEffects}
+Duration of Hair Loss: ${responses.hairLossDuration}
+Lifestyle Habits: ${responses.lifestyleHabits}
+Genetic Factors: ${responses.genetic}
+Sleep Pattern: ${responses.sleepHours}
+Digestive Issues: ${responses.digestiveIssues}
+Bowel Movements: ${responses.bowelMovements}
+Recommended Tests: ${responses.recommendedTests}
+
+Treatment Plan:
+--------------
+1. Prescribed Medications:${prescribedProducts}
+
+2. Lifestyle Recommendations:
+   - Maintain a balanced diet rich in proteins and vitamins
+   - Reduce stress through meditation or exercise
+   - Avoid harsh hair treatments and excessive heat styling
+   - Get adequate sleep (7-8 hours recommended)
+
+3. Follow-up Instructions:
+   - Schedule a follow-up appointment in 3 months
+   - Monitor for any side effects from medications
+   - Take photos of hair condition monthly to track progress
+
+Doctor's Signature: _________________
+Date: ${new Date().toLocaleDateString()}
+            `;
+            
+            // Set the prescription content
+            prescriptionContent.innerHTML = content.replace(/\n/g, '<br>');
+        }
+
+        // Function to share prescription via API
+        async function sharePrescriptionAPI(prescriptionText, phoneNumber) {
+            try {
+                const response = await fetch('http://localhost:3000/share-prescription', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prescriptionText: prescriptionText,
+                        phoneNumber: phoneNumber
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to process prescription');
+                }
+
+                return result;
+            } catch (error) {
+                console.error('Error sharing prescription:', error);
+                throw error;
+            }
+        }
+
+        // Add event listener for LimeChat button
+        document.getElementById('limechat-btn').addEventListener('click', async function() {
+            const limechatBtn = document.getElementById('limechat-btn');
+            const originalText = limechatBtn.textContent;
+            
+            try {
+                // Show loading state
+                limechatBtn.textContent = 'Processing...';
+                limechatBtn.disabled = true;
+
+                const prescriptionText = document.getElementById('prescription-content').textContent;
+                const phoneNumber = selectedPatient?.contact || '7569529960';
+
+                // Use the sharePrescriptionAPI function
+                const result = await sharePrescriptionAPI(prescriptionText, phoneNumber);
+
+                // Show success message
+                alert('Prescription has been shared successfully!\n\n' +
+                      'The prescription has been uploaded and is ready for download.');
+
+            } catch (error) {
+                console.error('Error sharing prescription:', error);
+                alert('Failed to share prescription: ' + error.message);
+            } finally {
+                // Restore button state
+                limechatBtn.textContent = originalText;
+                limechatBtn.disabled = false;
+            }
+        });
+
+        document.getElementById('print-btn').addEventListener('click', function() {
+            window.print();
+        });
+
+        document.getElementById('back-to-dashboard').addEventListener('click', function() {
+            prescriptionSection.style.display = 'none';
+            dashboardSection.style.display = 'block';
+        });
+        
+        // Function to reset questionnaire
+        function resetQuestionnaire() {
+            patientQuestionnaireForm.reset();
+            testsSpecifyGroup.style.display = 'none';
+        }
+        
+        // Load saved responses from local storage
+        const savedResponses = localStorage.getItem('patientResponses');
+        if (savedResponses) {
+            patientResponses = JSON.parse(savedResponses);
+        }
+
+        // Function to generate CRM data
+        function generateCRMData(responses) {
+            const crmData = {
+                patientInfo: {
+                    name: responses.patientName,
+                    age: responses.age,
+                    gender: responses.gender,
+                    contact: selectedPatient?.contact || '',
+                    appointment: selectedPatient?.appointment || '',
+                    condition: selectedPatient?.condition || ''
+                },
+                diagnosis: {
+                    primaryConcerns: responses.hairConcerns,
+                    problemType: responses.problemType,
+                    hairLossStage: responses.hairLossStage,
+                    dandruff: responses.dandruff,
+                    thinningDescription: responses.thinningDescription
+                },
+                patientHistory: {
+                    pastMedications: responses.pastMedications,
+                    sideEffects: responses.sideEffects,
+                    hairLossDuration: responses.hairLossDuration,
+                    lifestyleHabits: responses.lifestyleHabits,
+                    genetic: responses.genetic,
+                    sleepHours: responses.sleepHours,
+                    digestiveIssues: responses.digestiveIssues,
+                    bowelMovements: responses.bowelMovements,
+                    recommendedTests: responses.recommendedTests
+                },
+                treatment: {
+                    plan: document.querySelector('input[name="treatment-plan"]:checked')?.value || 'Not selected',
+                    prescribedProducts: getPrescribedProducts(),
+                    timestamp: new Date().toISOString()
+                }
+            };
+            
+            return crmData;
+        }
+
+        // Function to get prescribed products based on treatment plan
+        function getPrescribedProducts() {
+            const treatmentPlan = document.querySelector('input[name="treatment-plan"]:checked')?.value;
+            switch(treatmentPlan) {
+                case 'Complete Hair Kit':
+                    return ['Gummies', 'Sinibis', 'Minibis'];
+                case 'Classic Hair Kit':
+                    return ['Gummies', 'Sinibis', 'Finibis', 'Minibis'];
+                case 'Hair Dandruff Kit':
+                    return ['Gummies', 'Shampoo', 'Conditioner'];
+                default:
+                    return ['Minoxidil 5%', 'Finasteride 1mg', 'Ketoconazole shampoo'];
+            }
+        }
+
+        // Add PDF conversion functionality
+        document.getElementById('pdf-btn').addEventListener('click', function() {
+            const prescriptionText = document.getElementById('prescription-content').textContent;
+            
+            // Create a new jsPDF instance
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Set font and size
+            doc.setFont("helvetica");
+            doc.setFontSize(12);
+            
+            // Split text into lines and add to PDF
+            const lines = doc.splitTextToSize(prescriptionText, 180);
+            doc.text(lines, 15, 15);
+            
+            // Save the PDF
+            doc.save(`prescription_${selectedPatient?.name || 'patient'}.pdf`);
+        });
+
+        // Add event listener for LimeChat PDF button
+        document.getElementById('limechat-pdf-btn').addEventListener('click', async () => {
+            const prescriptionText = document.getElementById('prescription-content').textContent;
+            const phoneNumber = selectedPatient?.contact || '7569529960';
+
+            if (!prescriptionText || !phoneNumber) {
+                alert("Please enter both prescription and phone number.");
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/share-prescription', {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prescriptionText, phoneNumber }),
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    alert("Prescription PDF is ready!\n\nLink:\n" + result.link);
+                } else {
+                    alert("❌ Failed: " + (result.error || "Something went wrong"));
+                }
+            } catch (err) {
+                console.error('Request error:', err);
+                alert("⚠️ Could not reach server. Please make sure it's running.");
+            }
+        });
+    </script>
+</body>
+</html> 
