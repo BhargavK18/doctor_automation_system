@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nonu Care Prescription</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2ecc71;
+        }
+        .doctor-info {
+            color: #34495e;
+            margin: 10px 0;
+        }
+        .pdf-container {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f9f9f9;
+        }
+        .share-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .whatsapp-btn {
+            background-color: #25D366;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .whatsapp-btn:hover {
+            background-color: #128C7E;
+        }
+        #pdf-viewer {
+            width: 100%;
+            height: 500px;
+            border: none;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            font-size: 18px;
+        }
+        .debug {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Nonu Care</div>
+            <div class="doctor-info">Dr. Aparna</div>
+            <div class="doctor-info">Dermatologist</div>
+        </div>
+        
+        <div class="pdf-container">
+            <iframe id="pdf-viewer"></iframe>
+        </div>
+        
+        <div class="share-section">
+            <button class="whatsapp-btn" id="whatsapp-share">Share via WhatsApp</button>
+        </div>
+        
+        <div id="debug-info" class="debug"></div>
+    </div>
+
+    <script>
+        // Debug function
+        function debug(message) {
+            const debugDiv = document.getElementById('debug-info');
+            debugDiv.textContent += message + '\n';
+        }
+
+        // Parse prescription text into structured data
+        function parsePrescriptionText(text) {
+            const lines = text.split('\n');
+            const data = {
+                doctorName: '',
+                patientInfo: {
+                    name: '',
+                    age: '',
+                    gender: '',
+                    date: ''
+                },
+                diagnosis: {
+                    primaryConcerns: '',
+                    problemType: '',
+                    hairLossStage: '',
+                    dandruff: '',
+                    thinning: ''
+                },
+                history: {
+                    pastMedications: '',
+                    sideEffects: '',
+                    hairLossDuration: '',
+                    lifestyleHabits: '',
+                    genetic: '',
+                    sleepHours: '',
+                    digestiveIssues: '',
+                    bowelMovements: '',
+                    recommendedTests: ''
+                },
+                treatment: {
+                    medications: [],
+                    lifestyle: [],
+                    followUp: []
+                }
+            };
+
+            let currentSection = '';
+            let currentSubsection = '';
+
+            for (let line of lines) {
+                line = line.trim();
+                if (!line) continue;
+
+                // Check for main sections
+                if (line.includes('DOCTOR\'S PRESCRIPTION')) {
+                    continue;
+                } else if (line.includes('Dr.')) {
+                    data.doctorName = line;
+                } else if (line.includes('Patient Information:')) {
+                    currentSection = 'patientInfo';
+                } else if (line.includes('Diagnosis:')) {
+                    currentSection = 'diagnosis';
+                } else if (line.includes('Patient History:')) {
+                    currentSection = 'history';
+                } else if (line.includes('Treatment Plan:')) {
+                    currentSection = 'treatment';
+                } else if (line.includes('Prescribed Medications:')) {
+                    currentSubsection = 'medications';
+                } else if (line.includes('Lifestyle Recommendations:')) {
+                    currentSubsection = 'lifestyle';
+                } else if (line.includes('Follow-up Instructions:')) {
+                    currentSubsection = 'followUp';
+                } else if (line.includes('Doctor\'s Signature:')) {
+                    break;
+                } else if (line.includes(':')) {
+                    // Parse key-value pairs
+                    const [key, value] = line.split(':').map(s => s.trim());
+                    const keyLower = key.toLowerCase().replace(/\s+/g, '');
+                    
+                    if (currentSection === 'patientInfo') {
+                        if (keyLower === 'name') data.patientInfo.name = value;
+                        else if (keyLower === 'age') data.patientInfo.age = value;
+                        else if (keyLower === 'gender') data.patientInfo.gender = value;
+                        else if (keyLower === 'date') data.patientInfo.date = value;
+                    } else if (currentSection === 'diagnosis') {
+                        if (keyLower === 'primaryconcerns') data.diagnosis.primaryConcerns = value;
+                        else if (keyLower === 'problemtype') data.diagnosis.problemType = value;
+                        else if (keyLower === 'hairlossstage') data.diagnosis.hairLossStage = value;
+                        else if (keyLower === 'dandruff') data.diagnosis.dandruff = value;
+                        else if (keyLower === 'thinning/baldspots') data.diagnosis.thinning = value;
+                    } else if (currentSection === 'history') {
+                        if (keyLower === 'pastmedications') data.history.pastMedications = value;
+                        else if (keyLower === 'sideeffects') data.history.sideEffects = value;
+                        else if (keyLower === 'durationofhairloss') data.history.hairLossDuration = value;
+                        else if (keyLower === 'lifestylehabits') data.history.lifestyleHabits = value;
+                        else if (keyLower === 'geneticfactors') data.history.genetic = value;
+                        else if (keyLower === 'sleeppattern') data.history.sleepHours = value;
+                        else if (keyLower === 'digestiveissues') data.history.digestiveIssues = value;
+                        else if (keyLower === 'bowelmovements') data.history.bowelMovements = value;
+                        else if (keyLower === 'recommendedtests') data.history.recommendedTests = value;
+                    }
+                } else if (line.startsWith('-')) {
+                    // Parse list items
+                    const item = line.substring(1).trim();
+                    if (currentSection === 'treatment' && currentSubsection) {
+                        data.treatment[currentSubsection].push(item);
+                    }
+                }
+            }
+
+            return data;
+        }
+
+        // Fill PDF form fields
+        async function fillPDFForm() {
+            try {
+                // Get prescription text from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const prescriptionText = decodeURIComponent(urlParams.get('text') || '');
+                
+                if (!prescriptionText) {
+                    throw new Error('No prescription text provided');
+                }
+
+                // Parse the text into structured data
+                const data = parsePrescriptionText(prescriptionText);
+                debug('Parsed prescription data:');
+                debug(JSON.stringify(data, null, 2));
+
+                // Load the PDF template
+                const pdfBytes = await fetch('NonuCare_Dermatologist_Prescription_Updated.pdf').then(res => res.arrayBuffer());
+                const pdfDoc = await PDFLib.PDFDocument.load(pdfBytes);
+                
+                // Get the form
+                const form = pdfDoc.getForm();
+                
+                // Log all available form fields for debugging
+                const fields = form.getFields();
+                debug('Available form fields:');
+                fields.forEach(field => {
+                    const type = field.constructor.name;
+                    const name = field.getName();
+                    debug(`${type}: ${name}`);
+                });
+
+                // Map our data to the PDF form fields
+                // Note: These field names should match exactly with the PDF template
+                const fieldMapping = {
+                    // Patient Information
+                    'Patient Name': data.patientInfo.name,
+                    'Age': data.patientInfo.age,
+                    'Gender': data.patientInfo.gender,
+                    'Date': data.patientInfo.date,
+                    
+                    // Diagnosis
+                    'Primary Concerns': data.diagnosis.primaryConcerns,
+                    'Problem Type': data.diagnosis.problemType,
+                    'Hair Loss Stage': data.diagnosis.hairLossStage,
+                    'Dandruff': data.diagnosis.dandruff,
+                    'Thinning/Bald Spots': data.diagnosis.thinning,
+                    
+                    // Patient History
+                    'Past Medications': data.history.pastMedications,
+                    'Side Effects': data.history.sideEffects,
+                    'Duration of Hair Loss': data.history.hairLossDuration,
+                    'Lifestyle Habits': data.history.lifestyleHabits,
+                    'Genetic Factors': data.history.genetic,
+                    'Sleep Pattern': data.history.sleepHours,
+                    'Digestive Issues': data.history.digestiveIssues,
+                    'Bowel Movements': data.history.bowelMovements,
+                    'Recommended Tests': data.history.recommendedTests,
+                    
+                    // Treatment Plan
+                    'Medications': data.treatment.medications.join('\n'),
+                    'Lifestyle Recommendations': data.treatment.lifestyle.join('\n'),
+                    'Follow-up Instructions': data.treatment.followUp.join('\n')
+                };
+
+                // Fill in the form fields
+                for (const [fieldName, value] of Object.entries(fieldMapping)) {
+                    try {
+                        const field = form.getTextField(fieldName);
+                        if (field) {
+                            field.setText(value);
+                            debug(`Filled field "${fieldName}" with value: ${value}`);
+                        } else {
+                            debug(`Field not found: "${fieldName}"`);
+                        }
+                    } catch (error) {
+                        debug(`Error filling field "${fieldName}": ${error.message}`);
+                    }
+                }
+                
+                // Save the filled PDF
+                const filledPdfBytes = await pdfDoc.save();
+                const pdfBlob = new Blob([filledPdfBytes], { type: 'application/pdf' });
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                
+                // Display PDF in iframe
+                const pdfViewer = document.getElementById('pdf-viewer');
+                pdfViewer.src = pdfUrl;
+                
+                debug('PDF filled successfully');
+                return pdfBlob;
+            } catch (error) {
+                debug('Error filling PDF: ' + error.message);
+                console.error('Error filling PDF:', error);
+                return null;
+            }
+        }
+
+        // Share via WhatsApp
+        async function shareViaWhatsApp() {
+            try {
+                const pdfBlob = await fillPDFForm();
+                if (!pdfBlob) return;
+
+                // Convert PDF to base64
+                const reader = new FileReader();
+                reader.readAsDataURL(pdfBlob);
+                
+                reader.onloadend = function() {
+                    const base64data = reader.result;
+                    const formattedPhone = '7569529960'; // Default contact number
+                    
+                    // Create WhatsApp deep link
+                    const message = `Your Nonu Care Prescription (Attached)`;
+                    const whatsappUrl = `https://wa.me/91${formattedPhone}?text=${encodeURIComponent(message)}`;
+                    
+                    // Open WhatsApp
+                    window.open(whatsappUrl, '_blank');
+                };
+            } catch (error) {
+                debug('Error sharing via WhatsApp: ' + error.message);
+                console.error('Error sharing via WhatsApp:', error);
+            }
+        }
+
+        // Add event listener for WhatsApp share button
+        document.getElementById('whatsapp-share').addEventListener('click', shareViaWhatsApp);
+
+        // Fill PDF when page loads
+        window.onload = fillPDFForm;
+    </script>
+</body>
+</html>

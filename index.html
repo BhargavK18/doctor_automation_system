@@ -388,6 +388,14 @@
             background-color: #25D366;  /* LimeChat green color */
             border: 2px solid #128C7E;  /* Darker green border */
         }
+
+        .btn-pdf-link {
+            background-color: #9b59b6;  /* Purple color for PDF Link button */
+        }
+        
+        .btn-pdf-link:hover {
+            background-color: #8e44ad;
+        }
     </style>
 </head>
 <body>
@@ -946,10 +954,9 @@
             <div class="header">
                 <h1>Patient Prescription</h1>
                 <div class="prescription-actions">
-                    <button class="btn btn-limechat" id="limechat-btn">Share via LimeChat</button>
                     <button class="btn btn-print" id="print-btn">Print</button>
                     <button class="btn btn-pdf" id="pdf-btn">Download PDF</button>
-                    <button class="btn btn-limechat-pdf" id="limechat-pdf-btn">Share PDF via LimeChat</button>
+                    <button class="btn btn-pdf-link" id="pdf-link-btn">PDF Link</button>
                     <button class="btn btn-back" id="back-to-dashboard">Back to Dashboard</button>
                 </div>
             </div>
@@ -1256,7 +1263,7 @@
             const content = `
 DOCTOR'S PRESCRIPTION
 =====================
-Dr. Shankar Dada MBBS
+Dr. Apparna 
 
 Patient Information:
 ------------------
@@ -1340,36 +1347,6 @@ Date: ${new Date().toLocaleDateString()}
                 throw error;
             }
         }
-
-        // Add event listener for LimeChat button
-        document.getElementById('limechat-btn').addEventListener('click', async function() {
-            const limechatBtn = document.getElementById('limechat-btn');
-            const originalText = limechatBtn.textContent;
-            
-            try {
-                // Show loading state
-                limechatBtn.textContent = 'Processing...';
-                limechatBtn.disabled = true;
-
-                const prescriptionText = document.getElementById('prescription-content').textContent;
-                const phoneNumber = selectedPatient?.contact || '7569529960';
-
-                // Use the sharePrescriptionAPI function
-                const result = await sharePrescriptionAPI(prescriptionText, phoneNumber);
-
-                // Show success message
-                alert('Prescription has been shared successfully!\n\n' +
-                      'The prescription has been uploaded and is ready for download.');
-
-            } catch (error) {
-                console.error('Error sharing prescription:', error);
-                alert('Failed to share prescription: ' + error.message);
-            } finally {
-                // Restore button state
-                limechatBtn.textContent = originalText;
-                limechatBtn.disabled = false;
-            }
-        });
 
         document.getElementById('print-btn').addEventListener('click', function() {
             window.print();
@@ -1466,34 +1443,20 @@ Date: ${new Date().toLocaleDateString()}
             doc.save(`prescription_${selectedPatient?.name || 'patient'}.pdf`);
         });
 
-        // Add event listener for LimeChat PDF button
-        document.getElementById('limechat-pdf-btn').addEventListener('click', async () => {
+        // Add event listener for PDF Link button
+        document.getElementById('pdf-link-btn').addEventListener('click', function() {
             const prescriptionText = document.getElementById('prescription-content').textContent;
-            const phoneNumber = selectedPatient?.contact || '7569529960';
-
-            if (!prescriptionText || !phoneNumber) {
-                alert("Please enter both prescription and phone number.");
-                return;
-            }
-
-            try {
-                const response = await fetch('http://localhost:3000/share-prescription', {
-                    method: 'POST',
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ prescriptionText, phoneNumber }),
-                });
-
-                const result = await response.json();
-
-                if (response.ok && result.success) {
-                    alert("Prescription PDF is ready!\n\nLink:\n" + result.link);
-                } else {
-                    alert("❌ Failed: " + (result.error || "Something went wrong"));
-                }
-            } catch (err) {
-                console.error('Request error:', err);
-                alert("⚠️ Could not reach server. Please make sure it's running.");
-            }
+            const patientName = selectedPatient?.name || 'Patient';
+            const patientContact = selectedPatient?.contact || '7569529960';
+            
+            // Encode the prescription text and patient info for URL
+            const encodedText = encodeURIComponent(prescriptionText);
+            const encodedName = encodeURIComponent(patientName);
+            const encodedContact = encodeURIComponent(patientContact);
+            
+            // Open the prescription viewer in a new tab
+            const viewerUrl = `prescription-viewer.html?text=${encodedText}&name=${encodedName}&contact=${encodedContact}`;
+            window.open(viewerUrl, '_blank');
         });
     </script>
 </body>
